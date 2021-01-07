@@ -17,7 +17,6 @@ def create_mode_buttons():
         mode = modes[i]
         x = 0.25 + i * 0.25
         y = 0.60
-        # TODO: Create command
         button = Button(window, text=mode, font=("Comic Sans MS", 16),
                         command=(lambda m=mode: select_mode(m)))
         button.place(relx=x, rely=y, relwidth=.2, relheight=.1, anchor='n')
@@ -37,11 +36,6 @@ def select_mode(mode):
                 button.destroy()
 
     screen.clear()
-
-    # title.destroy()
-    # instruction.destroy()
-    # for button in mode_buttons:
-    #     button.destroy()
 
     if mode == 'EASY':
         num_guesses[0] = 10
@@ -78,6 +72,9 @@ def create_letter_buttons(root):
 
     return buttons
 
+
+# Displays length of the word, number of guesses left, letter the user has guessed,
+# blank lines for the word, and buttons for guessing letters
 def setup_game():
     screen['buttons'] = create_letter_buttons(window)
     game_progress = Frame(window)
@@ -97,11 +94,9 @@ def setup_game():
 
     wrong_guesses_title = Label(game_progress, text="Wrong Guesses", font=("Comic Sans MS", 15))
     wrong_guesses_title.place(relx=0.55, rely=0.5, anchor='center')
-    # hangman_game.guesses=['a', 'b', 'c', 'd', 'e', 'f', 'g']
     wrong_guesses = Label(game_progress, text=', '.join(hangman_game.guesses), font=("Comic Sans MS", 15),
                           borderwidth=3, relief='solid')
     wrong_guesses.place(relx=0.82, rely=0.5, relwidth=0.34, anchor='center')
-    # hangman_game.dashes='r____e___'
     blanks = Label(window, text=' '.join([char for char in hangman_game.dashes]), font=("Comic Sans MS", 30))
     blanks.place(relx=0.5, rely=0.15, anchor='center')
 
@@ -112,44 +107,48 @@ def setup_game():
     screen['blanks'] = blanks
 
 
+# Evaluates the guessed letter when user presses button
 def make_guess(letter):
     if not hangman_game.game_over() or num_guesses != 0:
         # Check if guess has already been made and if the guess is correct
-        # check_guess(letter)
         eval_guess(letter)
 
 
-# TODO: change number of guesses left if makes wrong guess
+# Updates GUI based on guess
 def eval_guess(letter):
+    # Updates blank lines with guessed letters if guesses correctly
     if hangman_game.is_correct_guess(letter):
-        # text_box.configure(text="Good guess! " + letter.upper() + " is in the word!")
         hangman_game.update_blanks(letter)
         screen['blanks'].configure(text=' '.join([char for char in hangman_game.dashes]))
 
+    # Adds wrong letter to list of wrong guesses to be displayed and decrements number
+    # of guesses the user has left
     else:
         screen['wrong guesses'].configure(text=', '.join(hangman_game.guesses))
         num_guesses[0] -= 1
         screen['guesses left'].configure(text=num_guesses)
 
+    # Disabled buttons of guessed letters
     for button in screen['buttons']:
         if button['text'] == letter.upper():
             button.configure(state='disabled')
 
+    # Outputs messages once game is over
     if hangman_game.won():
         msgbox.showinfo(title="Congratulations!", message="Congratulations! You won!")
         for button in screen['buttons']:
             button.configure(state='disabled')
 
     elif num_guesses[0] == 0:
-        msgbox.showinfo(title="GAME OVER", message="Game over! You lost.")
+        msgbox.showinfo(title="GAME OVER", message="Game over! You lost.\nThe word was '" + hangman_game.answer + "'.")
         for button in screen['buttons']:
             button.configure(state='disabled')
 
 
+# Gets words from file
 words = get_words("Words.txt")
 hangman_game = WordGuesser(words)
 num_guesses = [0]
-print("Answer:", hangman_game.answer)
 
 # Creates window for user to enter letters
 window = Tk()
@@ -161,20 +160,12 @@ window.geometry('700x400')
 title = Label(window, text="Hangman", bg='light yellow', font=("Comic Sans MS", 40))
 title.place(relx=0.5, rely=0.25, anchor='center')
 
-# TODO: Allow player to select mode (modes are based on the number of guesses the user has)
+# Prompts user to choose difficulty
 instruction = Label( window, text="Please select a difficulty level.", bg='light yellow',
                     font=("Comic Sans MS", 20))
 instruction.place(relx=0.5, rely=0.4, anchor='n')
 mode_buttons = create_mode_buttons()
 
 screen = {'title':title, 'instruction':instruction, 'buttons':mode_buttons}
-
-# TODO: Create frame to hold blank lines
-
-
-# TODO: Create frame to contain word info (length of word, guesses left, wrong guesses)
-
-
-# TODO: Create frame to contain letter buttons
 
 window.mainloop()
